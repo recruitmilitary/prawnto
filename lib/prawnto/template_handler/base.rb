@@ -68,6 +68,14 @@ module Prawnto
         @view.instance_eval source, template.filename, 1
         pdf.render
       end
+      
+      def compile(template)
+        "@prawnto_options = @controller.send :compute_prawnto_options;" +
+          "_set_controller_content_type(Mime::PDF);" +
+          "pdf = ::Prawn::Document.new(@prawnto_options[:prawn]);" +
+          template.source +
+          ";pdf.render;"
+      end
 
     end
   end
