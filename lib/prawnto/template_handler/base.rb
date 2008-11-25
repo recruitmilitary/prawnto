@@ -36,7 +36,7 @@ module Prawnto
         set_disposition
       end
 
-      def build_source_to_establish_locals(template)
+      def build_source_to_establish_locals(template, local_assigns)
         prawnto_locals = {}
         if dsl = @prawnto_options[:dsl]
           if dsl.kind_of?(Array)
@@ -45,7 +45,7 @@ module Prawnto
             prawnto_locals.merge!(dsl)
           end
         end
-        prawnto_locals.merge!(template.locals)
+        prawnto_locals.merge!(local_assigns)
         prawnto_locals.map {|k,v| "#{k} = #{v};"}.join("")
       end
 
@@ -53,11 +53,11 @@ module Prawnto
         @prawnto_options = @view.controller.send :compute_prawnto_options
       end
 
-      def render(template)
+      def render(template, local_assigns)
         pull_prawnto_options
         build_headers
 
-        source = build_source_to_establish_locals(template)
+        source = build_source_to_establish_locals(template, local_assigns)
         if @prawnto_options[:dsl]
           source += "pdf.instance_eval do\n#{template.source}\nend"
         else
@@ -69,6 +69,7 @@ module Prawnto
         pdf.render
       end
       
+      # For Rails 2.2 - not needed for Edge/2.3.
       def compile(template)
         "@prawnto_options = @controller.send :compute_prawnto_options;" +
           "_set_controller_content_type(Mime::PDF);" +
